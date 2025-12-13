@@ -1,0 +1,148 @@
+.revisions-page {
+  max-width: 900px;
+}
+
+.revisions-filters {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-text);
+}
+
+.filter-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.revisions-container {
+  margin-bottom: 2rem;
+}
+
+.revisions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.revision-card {
+  padding: 1.5rem;
+}
+
+.revision-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.revision-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.revision-type-badge {
+  padding: 0.25rem 0.75rem;
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.revision-date {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.revision-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.revision-status.pending {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-warning);
+}
+
+.revision-status.completed {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+.revision-status.missed {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-error);
+}
+
+.revision-content {
+  margin-bottom: 1rem;
+}
+
+.revision-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text);
+  margin: 0 0 0.5rem 0;
+}
+
+.revision-source {
+  font-size: 0.813rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.revision-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.revision-completed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--color-success);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .revision-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .revision-actions {
+    width: 100%;
+  }
+  
+  .revision-actions .btn {
+    flex: 1;
+  }
+}
