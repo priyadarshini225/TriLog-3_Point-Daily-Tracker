@@ -26,7 +26,7 @@ npm run dev
 
 ## Environment Variables
 
-- `PORT` - Server port (default: 5000)
+- `PORT` - Server port (default: 5000; this repo’s sample `backend/.env` uses `5001`)
 - `MONGODB_URI` - MongoDB connection string
 - `JWT_SECRET` - Secret key for access tokens
 - `JWT_REFRESH_SECRET` - Secret key for refresh tokens

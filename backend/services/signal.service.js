@@ -21,6 +21,95 @@ const uniqTopN = (items, n = 10) => {
   return out;
 };
 
+const STOPWORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'are',
+  'as',
+  'at',
+  'be',
+  'been',
+  'but',
+  'by',
+  'can',
+  'did',
+  'do',
+  'does',
+  'doing',
+  'done',
+  'for',
+  'from',
+  'had',
+  'has',
+  'have',
+  'how',
+  'i',
+  'if',
+  'in',
+  'into',
+  'is',
+  'it',
+  'its',
+  'just',
+  'like',
+  'me',
+  'my',
+  'not',
+  'of',
+  'on',
+  'or',
+  'our',
+  'so',
+  'that',
+  'the',
+  'their',
+  'them',
+  'then',
+  'there',
+  'these',
+  'they',
+  'this',
+  'to',
+  'today',
+  'tomorrow',
+  'was',
+  'we',
+  'were',
+  'what',
+  'when',
+  'where',
+  'which',
+  'who',
+  'will',
+  'with',
+  'you',
+  'your',
+]);
+
+const extractKeywordsFromText = (text, { max = 12 } = {}) => {
+  const normalized = normalizeToken(text);
+  if (!normalized) return [];
+
+  const tokens = normalized
+    .split(' ')
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .filter((t) => t.length >= 3)
+    .filter((t) => !STOPWORDS.has(t))
+    .filter((t) => !/^\d+$/.test(t));
+
+  const counts = new Map();
+  for (const t of tokens) {
+    counts.set(t, (counts.get(t) || 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, Math.max(0, max))
+    .map(([t]) => t);
+};
+
 const PLATFORM_PATTERNS = [
   { key: 'LeetCode', patterns: [/\bleetcode\b/i] },
   { key: 'HackerRank', patterns: [/\bhackerrank\b/i] },
@@ -87,6 +176,7 @@ export const extractSignalsFromEntries = (entries) => {
   const platforms = [];
   const topics = [];
   const highlights = [];
+  const keywordTexts = [];
 
   for (const entry of entries || []) {
     const learned = normalizeToken(entry.learned);
@@ -97,6 +187,8 @@ export const extractSignalsFromEntries = (entries) => {
       .filter(Boolean);
 
     const allText = [learned, completed, ...reviseTexts].join(' ').trim();
+
+    if (allText) keywordTexts.push(allText);
 
     // Platforms
     for (const p of PLATFORM_PATTERNS) {
@@ -119,17 +211,22 @@ export const extractSignalsFromEntries = (entries) => {
     const tagList = Array.isArray(entry.tags) ? entry.tags : [];
     for (const t of tagList) topics.push(String(t));
 
+    if (tagList.length) keywordTexts.push(tagList.join(' '));
+
     // Highlights: keep a short learned snippet if present
     if (entry.learned) {
       highlights.push(String(entry.learned).trim().slice(0, 180));
     }
   }
 
+  const keywords = extractKeywordsFromText(keywordTexts.join(' '), { max: 14 });
+
   return {
     subjects: uniqTopN(subjects, 12),
     algorithms: uniqTopN(algorithms, 12),
     platforms: uniqTopN(platforms, 10),
     topics: uniqTopN(topics, 12),
+    keywords: uniqTopN(keywords, 14),
     highlights: uniqTopN(highlights, 10),
   };
 };
@@ -139,6 +236,7 @@ export const scoreResources = ({ resources, signals }) => {
   const algoSet = new Set((signals?.algorithms || []).map((s) => s.toLowerCase()));
   const platformSet = new Set((signals?.platforms || []).map((s) => s.toLowerCase()));
   const topicSet = new Set((signals?.topics || []).map((s) => s.toLowerCase()));
+  const keywordSet = new Set((signals?.keywords || []).map((s) => s.toLowerCase()));
 
   const scoreTag = (tag) => {
     const t = String(tag || '').toLowerCase();
@@ -147,6 +245,7 @@ export const scoreResources = ({ resources, signals }) => {
     if (algoSet.has(t)) return 4;
     if (subjectSet.has(t)) return 3;
     if (topicSet.has(t)) return 2;
+    if (keywordSet.has(t)) return 2;
     return 0;
   };
 

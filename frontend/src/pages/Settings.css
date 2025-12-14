@@ -19,18 +19,61 @@
   margin-bottom: 1.5rem;
 }
 
-.checkbox-label {
+.toggle {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   cursor: pointer;
   font-size: 0.938rem;
+  user-select: none;
 }
 
-.checkbox-label input[type="checkbox"] {
-  width: 1.125rem;
-  height: 1.125rem;
-  cursor: pointer;
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toggle-ui {
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+
+.toggle-ui::after {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration) var(--ease);
+}
+
+.toggle input:focus-visible + .toggle-ui {
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+.toggle input:checked + .toggle-ui {
+  background: var(--color-primary-soft);
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+}
+
+.toggle input:checked + .toggle-ui::after {
+  transform: translateX(18px);
+}
+
+.toggle-text {
+  color: var(--color-text);
 }
 
 .dnd-times {
@@ -38,7 +81,8 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
   padding: 1rem;
-  background: var(--color-bg);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   margin-top: 1rem;
 }

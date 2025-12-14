@@ -1,5 +1,5 @@
 .calendar-page {
-  max-width: 1000px;
+  max-width: 860px;
 }
 
 .calendar-header {
@@ -20,50 +20,50 @@
 }
 
 .month-title {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  min-width: 180px;
+  min-width: 160px;
   text-align: center;
 }
 
 .calendar-container {
-  padding: 2rem;
+  padding: 1.25rem;
   margin-bottom: 2rem;
 }
 
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
+  gap: 0.4rem;
   margin-bottom: 1rem;
 }
 
 .weekday {
   text-align: center;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.813rem;
   color: var(--color-text-secondary);
-  padding: 0.5rem;
+  padding: 0.35rem;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .calendar-day {
   aspect-ratio: 1;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 0.5rem;
+  padding: 0.35rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--duration) var(--ease), border-color var(--duration) var(--ease), transform var(--duration) var(--ease);
   position: relative;
 }
 
@@ -74,7 +74,8 @@
 
 .calendar-day:not(.empty):hover {
   border-color: var(--color-primary);
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--color-primary-soft);
+  transform: translateY(-1px);
 }
 
 .calendar-day.other-month {
@@ -84,16 +85,17 @@
 .calendar-day.today {
   border-color: var(--color-primary);
   border-width: 2px;
-  background: rgba(99, 102, 241, 0.05);
+  background: var(--color-primary-soft);
 }
 
 .calendar-day.has-entry {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border));
 }
 
 .day-number {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.813rem;
   color: var(--color-text);
 }
 
@@ -117,11 +119,11 @@
 
 .stat-card {
   text-align: center;
-  padding: 2rem;
+  padding: 1.25rem;
 }
 
 .stat-value {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--color-primary);
   margin-bottom: 0.5rem;

@@ -9,8 +9,8 @@ import './index.css'
 // Apply persisted theme before first render to avoid a flash/reset.
 try {
   const storedTheme = localStorage.getItem('trilog_theme')
-  if (storedTheme === 'bw') {
-    document.documentElement.setAttribute('data-theme', 'bw')
+  if (storedTheme === 'dark' || storedTheme === 'bw') {
+    document.documentElement.setAttribute('data-theme', 'dark')
   }
 } catch {
   // ignore
@@ -36,8 +36,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#363636',
-              color: '#fff',
+              background: 'var(--color-surface)',
+              color: 'var(--color-text)',
+              border: '1px solid var(--color-border)',
+              boxShadow: 'var(--shadow-sm)',
             },
           }}
         />

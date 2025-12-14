@@ -4,7 +4,10 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background:
+    radial-gradient(900px 520px at 20% 10%, var(--color-primary-soft), transparent 60%),
+    radial-gradient(700px 420px at 80% 30%, var(--color-primary-soft), transparent 55%),
+    var(--color-bg);
 }
 
 .auth-card {
@@ -13,7 +16,8 @@
   background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: 2.5rem;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
 }
 
 .auth-header {

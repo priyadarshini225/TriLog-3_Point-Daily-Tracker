@@ -41,8 +41,8 @@ function Login() {
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="auth-container app-bg">
+      <div className="auth-card glass-card fade-in">
         <div className="auth-header">
           <h1 className="auth-logo">TriLog</h1>
           <p className="auth-subtitle">3-Point Daily Tracker</p>

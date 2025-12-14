@@ -8,7 +8,6 @@ import NewEntry from './pages/NewEntry'
 import Calendar from './pages/Calendar'
 import Revisions from './pages/Revisions'
 import Settings from './pages/Settings'
-import Summaries from './pages/Summaries'
 
 function App() {
   const { isAuthenticated } = useAuthStore()
@@ -23,8 +22,8 @@ function App() {
         <Route path="new" element={<NewEntry />} />
         <Route path="calendar" element={<Calendar />} />
         <Route path="revisions" element={<Revisions />} />
-        <Route path="summaries" element={<Summaries />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   )

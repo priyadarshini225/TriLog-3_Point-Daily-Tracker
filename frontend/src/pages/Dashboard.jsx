@@ -45,7 +45,7 @@ function Dashboard() {
   const pendingRevisions = revisionsData?.revisions || []
 
   return (
-    <div className="dashboard">
+    <div className="dashboard fade-in">
       <div className="dashboard-header">
         <div>
           <h1 className="page-title">Dashboard</h1>
@@ -62,7 +62,7 @@ function Dashboard() {
 
       <div className="dashboard-grid">
         {/* Today's Entry Status */}
-        <div className="card dashboard-card">
+        <div className="card dashboard-card glass-card">
           <div className="card-header">
             <h3 className="card-title">
               <Calendar size={20} />
@@ -112,7 +112,7 @@ function Dashboard() {
         </div>
 
         {/* Today's Question */}
-        <div className="card dashboard-card">
+        <div className="card dashboard-card glass-card">
           <div className="card-header">
             <h3 className="card-title">Daily Question</h3>
           </div>
@@ -145,7 +145,7 @@ function Dashboard() {
 
       {/* Pending Revisions */}
       {pendingRevisions.length > 0 && (
-        <div className="card">
+        <div className="card glass-card">
           <div className="card-header">
             <h3 className="card-title">Pending Revisions</h3>
             <Link to="/revisions" className="btn btn-secondary btn-sm">

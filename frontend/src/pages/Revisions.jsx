@@ -48,7 +48,7 @@ function Revisions() {
   const revisions = data?.revisions || []
 
   return (
-    <div className="revisions-page">
+    <div className="revisions-page fade-in">
       <div className="page-header">
         <div>
           <h1 className="page-title">Revisions</h1>
@@ -79,16 +79,16 @@ function Revisions() {
 
       <div className="revisions-container">
         {isLoading ? (
-          <div className="loading-state card">Loading revisions...</div>
+          <div className="loading-state card glass-card">Loading revisions...</div>
         ) : revisions.length === 0 ? (
-          <div className="empty-state card">
+          <div className="empty-state card glass-card">
             <Clock size={48} className="empty-icon" />
             <p>No {filter !== 'all' ? filter : ''} revisions found</p>
           </div>
         ) : (
           <div className="revisions-list">
             {revisions.map((revision) => (
-              <div key={revision._id} className="revision-card card">
+              <div key={revision._id} className="revision-card card glass-card">
                 <div className="revision-header">
                   <div className="revision-meta">
                     <span className="revision-type-badge">Day {revision.revisionType}</span>

@@ -265,7 +265,6 @@ TriLog/
 The codebase is structured to easily add:
 
 - **Notifications** - Push/email for revisions
-- **AI Summaries** - Monthly analysis (placeholder exists)
 - **Growth Profile** - Longitudinal insights
 - **Streak Tracking** - Gamification
 - **Export** - PDF/JSON downloads

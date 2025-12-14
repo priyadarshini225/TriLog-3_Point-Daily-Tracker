@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
-import { Home, Calendar as CalendarIcon, RotateCcw, Settings as SettingsIcon, LogOut, FileText } from 'lucide-react'
+import {
+  Home,
+  Calendar as CalendarIcon,
+  RotateCcw,
+  Settings as SettingsIcon,
+  LogOut,
+  Menu,
+  Sun,
+  Moon,
+  X,
+} from 'lucide-react'
 import { useAuthStore } from '../store/authStore'
 import './Layout.css'
 
@@ -10,9 +20,11 @@ const THEME_STORAGE_KEY = 'trilog_theme'
 const getInitialTheme = () => {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY)
-    return stored === 'bw' ? 'bw' : 'color'
+    // Back-compat for earlier theme names.
+    if (stored === 'dark' || stored === 'bw') return 'dark'
+    return 'light'
   } catch {
-    return 'color'
+    return 'light'
   }
 }
 
@@ -23,13 +35,35 @@ function Layout() {
   const { user, logout } = useAuthStore()
 
   const [theme, setTheme] = useState(getInitialTheme)
-  const isBwTheme = theme === 'bw'
+  const isDarkTheme = theme === 'dark'
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+
+    const sync = () => {
+      const mobile = mq.matches
+      setIsMobile(mobile)
+      setIsSidebarOpen(!mobile)
+    }
+
+    sync()
+    if (typeof mq.addEventListener === 'function') {
+      mq.addEventListener('change', sync)
+      return () => mq.removeEventListener('change', sync)
+    }
+
+    // Safari fallback
+    mq.addListener(sync)
+    return () => mq.removeListener(sync)
+  }, [])
 
   useEffect(() => {
     const root = document.documentElement
 
-    if (theme === 'bw') {
-      root.setAttribute('data-theme', 'bw')
+    if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark')
     } else {
       root.removeAttribute('data-theme')
     }
@@ -51,16 +85,33 @@ function Layout() {
     { path: '/', icon: Home, label: 'Dashboard' },
     { path: '/calendar', icon: CalendarIcon, label: 'Calendar' },
     { path: '/revisions', icon: RotateCcw, label: 'Revisions' },
-    { path: '/summaries', icon: FileText, label: 'Summaries' },
     { path: '/settings', icon: SettingsIcon, label: 'Settings' },
   ]
 
+  const displayName = user?.name?.trim() || 'there'
+  const greeting = `Hello ${displayName}!`
+
   return (
-    <div className="layout">
+    <div
+      className={`layout ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}
+    >
       <aside className="sidebar">
         <div className="sidebar-header">
-          <h1 className="logo">TriLog</h1>
-          <p className="tagline">3-Point Daily Tracker</p>
+          <div className="sidebar-brand">
+            <h1 className="logo">TriLog</h1>
+            <p className="tagline">3-Point Daily Tracker</p>
+          </div>
+          <div className="sidebar-actions">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => setIsSidebarOpen(false)}
+              aria-label="Close sidebar"
+              title="Close sidebar"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <nav className="nav">
@@ -90,15 +141,6 @@ function Layout() {
               <p className="user-email">{user?.email}</p>
             </div>
           </div>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => setTheme((t) => (t === 'bw' ? 'color' : 'bw'))}
-            aria-pressed={isBwTheme}
-            title="Toggle black & white theme"
-            type="button"
-          >
-            {isBwTheme ? 'Color Theme' : 'B/W Theme'}
-          </button>
           <button className="btn btn-secondary btn-sm" onClick={handleLogout}>
             <LogOut size={16} />
             Logout
@@ -106,9 +148,44 @@ function Layout() {
         </div>
       </aside>
 
-      <main className="main-content">
-        <Outlet />
-      </main>
+      <div className="content-shell app-bg">
+        <header className="topbar">
+          <div className="topbar-inner">
+            <div className="topbar-left">
+              <button
+                type="button"
+                className="icon-btn topbar-menu"
+                onClick={() => setIsSidebarOpen(true)}
+                aria-label="Open sidebar"
+                title="Open sidebar"
+              >
+                <Menu size={18} />
+              </button>
+
+              <h2 className="topbar-title">{greeting}</h2>
+            </div>
+
+            <button
+              type="button"
+              className="theme-switch"
+              role="switch"
+              aria-checked={isDarkTheme}
+              onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+              title="Toggle theme"
+            >
+              <span className="switch-label">{isDarkTheme ? 'Dark' : 'Light'}</span>
+              {isDarkTheme ? <Moon size={16} /> : <Sun size={16} />}
+              <span className="switch-track" aria-hidden="true">
+                <span className="switch-thumb" />
+              </span>
+            </button>
+          </div>
+        </header>
+
+        <main className="main-content">
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }

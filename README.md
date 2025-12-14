@@ -1,6 +1,6 @@
 # TriLog — 3-Point Daily Tracker
 
-A minimalist habit-focused productivity application that combines daily three-item reflection with spaced repetition and AI-powered insights.
+A minimalist habit-focused productivity application that combines daily three-item reflection with spaced repetition.
 
 ## Project Overview
 
@@ -8,7 +8,6 @@ TriLog helps users build a daily reflection habit with:
 - **3-Point Daily Entry**: Complete, Learn, Revise Later
 - **Daily Question Coach**: One micro-question per day
 - **1-3-7 Spaced Revision**: Automatic reminder scheduling
-- **Monthly AI Summaries**: Growth insights (coming soon)
 
 ## Architecture
 
@@ -39,7 +38,7 @@ cd backend
 npm install
 # Edit .env with your MongoDB URI and secrets
 npm run seed  # Seed question templates
-npm run dev   # Start backend on port 5000
+npm run dev   # Start backend on port 5001
 ```
 
 3. **Setup Frontend** (in new terminal)
@@ -67,7 +66,6 @@ npm run dev   # Start frontend on port 3000
 
 ### Coming Soon
 🔜 Push notifications for revisions
-🔜 Monthly AI summaries
 🔜 Growth profile analysis
 🔜 Streak tracking and gamification
 🔜 Data export (PDF/JSON)
@@ -127,7 +125,7 @@ TriLog/
 
 ### Backend (.env)
 ```
-PORT=5000
+PORT=5001
 MONGODB_URI=mongodb://localhost:27017/trilog
 JWT_SECRET=your-secret-key
 JWT_REFRESH_SECRET=your-refresh-secret
@@ -136,7 +134,7 @@ CLIENT_URL=http://localhost:3000
 
 ### Frontend (.env)
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001/api
 ```
 
 ## Development Workflow
@@ -200,7 +198,6 @@ MIT
 ## Roadmap
 
 See the full process flow document for detailed architecture and future enhancements including:
-- AI-powered monthly summaries
 - Growth profile analysis
 - Advanced spaced repetition algorithms
 - Mobile applications

@@ -49,7 +49,7 @@ function Calendar() {
   const emptyDays = Array(firstDayOfWeek).fill(null)
 
   return (
-    <div className="calendar-page">
+    <div className="calendar-page fade-in">
       <div className="calendar-header">
         <h1 className="page-title">Calendar</h1>
         <div className="calendar-controls">
@@ -68,7 +68,7 @@ function Calendar() {
         </div>
       </div>
 
-      <div className="calendar-container card">
+      <div className="calendar-container card glass-card">
         {isLoading ? (
           <div className="loading-state">Loading calendar...</div>
         ) : (
@@ -112,17 +112,17 @@ function Calendar() {
 
       {/* Stats */}
       <div className="calendar-stats">
-        <div className="stat-card card">
+        <div className="stat-card card glass-card">
           <div className="stat-value">{entries.length}</div>
           <div className="stat-label">Entries this month</div>
         </div>
-        <div className="stat-card card">
+        <div className="stat-card card glass-card">
           <div className="stat-value">
             {entries.length > 0 ? Math.round((entries.length / days.length) * 100) : 0}%
           </div>
           <div className="stat-label">Completion rate</div>
         </div>
-        <div className="stat-card card">
+        <div className="stat-card card glass-card">
           <div className="stat-value">
             {entries.reduce((sum, entry) => sum + (entry.reviseLater?.length || 0), 0)}
           </div>

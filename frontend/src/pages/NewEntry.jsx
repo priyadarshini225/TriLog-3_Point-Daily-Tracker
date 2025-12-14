@@ -98,14 +98,14 @@ function NewEntry() {
   const isFormValid = formData.completed.trim() && formData.learned.trim()
 
   return (
-    <div className="new-entry">
+    <div className="new-entry fade-in">
       <div className="page-header">
         <h1 className="page-title">New Daily Entry</h1>
         <p className="page-subtitle">{format(new Date(formData.date), 'EEEE, MMMM d, yyyy')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="entry-form">
-        <div className="form-section">
+        <div className="form-section glass-card">
           <h2 className="section-title">Three-Point Reflection</h2>
 
           <div className="form-group">
@@ -191,9 +191,9 @@ function NewEntry() {
         </div>
 
         {questionData?.question && !questionData?.answered && (
-          <div className="form-section">
+          <div className="form-section glass-card">
             <h2 className="section-title">Daily Question</h2>
-            <div className="question-box">
+            <div className="question-box glass-card--tight">
               <div className="question-category">{questionData.question.category}</div>
               <p className="question-text">{questionData.question.text}</p>
             </div>

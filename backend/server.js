@@ -7,7 +7,6 @@ import authRoutes from './routes/auth.routes.js';
 import entryRoutes from './routes/entry.routes.js';
 import questionRoutes from './routes/question.routes.js';
 import revisionRoutes from './routes/revision.routes.js';
-import summaryRoutes from './routes/summary.routes.js';
 import userRoutes from './routes/user.routes.js';
 import { startNotificationScheduler } from './scheduler/notificationScheduler.js';
 
@@ -47,7 +46,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/entries', entryRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/revisions', revisionRoutes);
-app.use('/api/summaries', summaryRoutes);
 app.use('/api/user', userRoutes);
 
 // Error handling

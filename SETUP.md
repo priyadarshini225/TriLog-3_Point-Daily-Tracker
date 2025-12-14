@@ -95,7 +95,7 @@ npm run dev
 You should see:
 ```
 ✅ MongoDB Connected: ...
-✅ Server running on port 5000
+✅ Server running on port 5001
 ```
 
 #### Start Frontend (Terminal 2)
@@ -169,6 +169,7 @@ CLIENT_URL=http://localhost:3000
 Here's a quick checklist:
 
 - [ ] Backend running on port 5000
+- [ ] Backend running on port 5001
 - [ ] Frontend running on port 3000
 - [ ] Can access login page
 - [ ] Can create an account
@@ -214,5 +215,4 @@ Common issues and solutions:
 **Solution:** Revisions are scheduled for future dates (1, 3, 7 days later)
 
 ---
-
 🎉 **You're all set!** Start building your daily reflection habit with TriLog.

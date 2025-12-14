@@ -74,14 +74,14 @@ function Settings() {
   const dndWindow = preferences.dndWindow || {}
 
   return (
-    <div className="settings-page">
+    <div className="settings-page fade-in">
       <div className="page-header">
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">Manage your preferences and notifications</p>
       </div>
 
       <form onSubmit={handleSubmit} className="settings-form">
-        <div className="settings-section card">
+        <div className="settings-section card glass-card">
           <h2 className="section-title">General</h2>
           
           <div className="form-group">
@@ -106,11 +106,11 @@ function Settings() {
           </div>
         </div>
 
-        <div className="settings-section card">
+        <div className="settings-section card glass-card">
           <h2 className="section-title">Notifications</h2>
           
           <div className="checkbox-group">
-            <label className="checkbox-label">
+            <label className="toggle">
               <input
                 type="checkbox"
                 checked={notificationChannels.push !== false}
@@ -118,10 +118,11 @@ function Settings() {
                   handlePreferenceChange('notificationChannels', 'push', e.target.checked)
                 }
               />
-              <span>Push Notifications</span>
+              <span className="toggle-ui" aria-hidden="true" />
+              <span className="toggle-text">Push Notifications</span>
             </label>
             
-            <label className="checkbox-label">
+            <label className="toggle">
               <input
                 type="checkbox"
                 checked={notificationChannels.email === true}
@@ -129,12 +130,13 @@ function Settings() {
                   handlePreferenceChange('notificationChannels', 'email', e.target.checked)
                 }
               />
-              <span>Email Notifications</span>
+              <span className="toggle-ui" aria-hidden="true" />
+              <span className="toggle-text">Email Notifications</span>
             </label>
           </div>
 
           <div className="form-group">
-            <label className="checkbox-label">
+            <label className="toggle">
               <input
                 type="checkbox"
                 checked={dndWindow.enabled === true}
@@ -142,7 +144,8 @@ function Settings() {
                   handlePreferenceChange('dndWindow', 'enabled', e.target.checked)
                 }
               />
-              <span>Enable Do Not Disturb</span>
+              <span className="toggle-ui" aria-hidden="true" />
+              <span className="toggle-text">Enable Do Not Disturb</span>
             </label>
           </div>
 
