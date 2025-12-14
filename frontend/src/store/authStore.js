@@ -21,12 +21,26 @@ export const useAuthStore = create(
       },
       
       updateUser: (userData) => {
-        set((state) => ({ user: { ...state.user, ...userData } }))
+        set((state) => ({ 
+          user: { 
+            ...state.user, 
+            ...userData,
+            // Ensure nested objects are properly merged
+            preferences: userData.preferences ? {
+              ...state.user?.preferences,
+              ...userData.preferences
+            } : state.user?.preferences
+          } 
+        }))
       },
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({ 
+        user: state.user, 
+        isAuthenticated: state.isAuthenticated,
+        accessToken: state.accessToken
+      }),
     }
   )
 )

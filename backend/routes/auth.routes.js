@@ -1,7 +1,8 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { signup, login, refreshToken, getProfile } from '../controllers/auth.controller.js';
+import { signup, login, refreshToken, getProfile, verifyEmail, resendVerification } from '../controllers/auth.controller.js';
 import { protect } from '../middleware/auth.js';
+import { authLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -18,10 +19,12 @@ const loginValidation = [
   body('password').notEmpty().withMessage('Password is required')
 ];
 
-// Routes
-router.post('/signup', signupValidation, signup);
-router.post('/login', loginValidation, login);
-router.post('/refresh', refreshToken);
+// Routes with rate limiting on auth endpoints
+router.post('/signup', authLimiter, signupValidation, signup);
+router.post('/login', authLimiter, loginValidation, login);
+router.post('/refresh', authLimiter, refreshToken);
 router.get('/profile', protect, getProfile);
+router.get('/verify-email/:token', verifyEmail);
+router.post('/resend-verification', protect, resendVerification);
 
 export default router;

@@ -4,8 +4,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import {
   Home,
   Calendar as CalendarIcon,
+  Clock,
   RotateCcw,
+  Users,
   Settings as SettingsIcon,
+  User as UserIcon,
   LogOut,
   Menu,
   Sun,
@@ -84,7 +87,10 @@ function Layout() {
   const navItems = [
     { path: '/', icon: Home, label: 'Dashboard' },
     { path: '/calendar', icon: CalendarIcon, label: 'Calendar' },
+    { path: '/schedule', icon: Clock, label: 'Schedule' },
     { path: '/revisions', icon: RotateCcw, label: 'Revisions' },
+    { path: '/friends', icon: Users, label: 'Friends' },
+    { path: '/profile', icon: UserIcon, label: 'Profile' },
     { path: '/settings', icon: SettingsIcon, label: 'Settings' },
   ]
 
