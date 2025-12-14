@@ -11,11 +11,13 @@ TriLog helps users build a daily reflection habit with:
 
 ## Architecture
 
-- **Frontend**: React + Vite
-- **Backend**: Node.js + Express
-- **Database**: MongoDB
+- **Frontend**: React + Vite, Glassmorphism UI, Light/Dark theme
+- **Backend**: Node.js + Express, ESM modules
+- **Database**: MongoDB with Mongoose
 - **State Management**: React Query + Zustand
-- **Authentication**: JWT tokens
+- **Authentication**: JWT tokens with refresh rotation
+- **Email**: SMTP integration (Gmail compatible)
+- **Styling**: CSS3 variables, responsive design
 
 ## Quick Start
 
@@ -57,12 +59,21 @@ npm run dev   # Start frontend on port 3000
 
 ### Current (v1.0)
 ✅ User authentication (signup/login)
-✅ Daily 3-point entry form
+✅ Daily 3-point entry form (Completed, Learned, Revise Later)
 ✅ Daily question system with categories
 ✅ 1-3-7 day revision scheduling
 ✅ Calendar view with entry tracking
-✅ Revision dashboard
+✅ Revision dashboard with status tracking
 ✅ User settings and preferences
+✅ Email notifications for due revisions
+✅ Light/Dark theme support
+✅ Glassmorphism UI design
+
+### Removed Features
+❌ AI/Summaries (GPT-4 integration)
+❌ RAG embeddings
+❌ Weekly/Monthly summaries
+❌ OpenAI API dependencies
 
 ### Coming Soon
 🔜 Push notifications for revisions
@@ -76,22 +87,31 @@ npm run dev   # Start frontend on port 3000
 
 ```
 TriLog/
-├── backend/              # Node.js API
-│   ├── config/          # Database config
-│   ├── controllers/     # Route handlers
-│   ├── middleware/      # Auth, error handling
-│   ├── models/          # Mongoose schemas
-│   ├── routes/          # API routes
-│   ├── services/        # Business logic
-│   └── server.js        # Entry point
-├── frontend/            # React SPA
+├── backend/                 # Node.js API (ESM)
+│   ├── config/             # Database config
+│   ├── controllers/        # Route handlers
+│   ├── middleware/         # Auth, error handling
+│   ├── models/             # Mongoose schemas
+│   ├── routes/             # API endpoints
+│   ├── scheduler/          # Notification scheduler
+│   ├── services/           # Business logic
+│   ├── utils/              # Shared utilities
+│   │   ├── errorResponse.js    # Standardized error responses
+│   │   ├── tokenUtils.js       # JWT generation helpers
+│   │   └── validationHandler.js # Validation error handling
+│   ├── scripts/            # Seed & test scripts
+│   └── server.js           # Entry point
+├── frontend/               # React SPA (Vite)
 │   ├── src/
-│   │   ├── components/  # UI components
-│   │   ├── pages/       # Page views
-│   │   ├── store/       # State management
-│   │   ├── lib/         # API client
-│   │   └── App.jsx
-│   └── index.html
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/          # Page views (Dashboard, Calendar, etc.)
+│   │   ├── store/          # Zustand state management
+│   │   ├── lib/            # API client & utilities
+│   │   ├── App.jsx         # Main app router
+│   │   ├── main.jsx        # Entry point
+│   │   └── index.css       # Shared styles + utilities
+│   ├── index.html
+│   └── vite.config.js
 └── README.md
 ```
 
