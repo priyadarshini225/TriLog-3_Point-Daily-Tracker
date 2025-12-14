@@ -1,13 +1,18 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { connectDB } from './config/database.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
+import { sanitizeInput, sanitizeXSS } from './middleware/sanitize.js';
 import authRoutes from './routes/auth.routes.js';
 import entryRoutes from './routes/entry.routes.js';
 import questionRoutes from './routes/question.routes.js';
 import revisionRoutes from './routes/revision.routes.js';
 import userRoutes from './routes/user.routes.js';
+import scheduleRoutes from './routes/schedule.routes.js';
+import friendRoutes from './routes/friend.routes.js';
 import { startNotificationScheduler } from './scheduler/notificationScheduler.js';
 
 dotenv.config();
@@ -15,13 +20,57 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
+// Security: Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// CORS whitelist configuration
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'http://localhost:3000',
+  'http://localhost:5173', // Vite default port
+];
+
+// Add production URLs from environment variable
+if (process.env.ALLOWED_ORIGINS) {
+  allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(','));
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.warn(`Blocked CORS request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Body parsing with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Security: Input sanitization
+app.use(sanitizeInput);
+app.use(sanitizeXSS);
+
+// Apply general rate limiting to all API routes
+app.use('/api', apiLimiter);
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -47,6 +96,8 @@ app.use('/api/entries', entryRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/revisions', revisionRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/schedules', scheduleRoutes);
+app.use('/api/friends', friendRoutes);
 
 // Error handling
 app.use(errorHandler);

@@ -1,6 +1,8 @@
 import { validationResult } from 'express-validator';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.model.js';
 import { generateToken, generateRefreshToken } from '../utils/tokenUtils.js';
+import { generateVerificationToken, sendVerificationEmail, sendWelcomeEmail } from '../services/email.service.js';
 
 // @desc    Register new user
 // @route   POST /api/auth/signup
@@ -34,8 +36,23 @@ export const signup = async (req, res, next) => {
       email,
       passwordHash: password,
       name,
-      timezone: timezone || 'UTC'
+      timezone: timezone || 'UTC',
+      isEmailVerified: false
     });
+
+    // Generate verification token
+    const verificationToken = generateVerificationToken();
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await user.save();
+
+    // Send verification email (don't block registration if this fails)
+    try {
+      await sendVerificationEmail(user, verificationToken);
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      // Continue with registration
+    }
 
     // Generate tokens
     const accessToken = generateToken(user._id);
@@ -50,7 +67,8 @@ export const signup = async (req, res, next) => {
         email: user.email,
         name: user.name,
         timezone: user.timezone,
-        preferences: user.preferences
+        preferences: user.preferences,
+        isEmailVerified: user.isEmailVerified
       }
     });
   } catch (error) {
@@ -121,7 +139,8 @@ export const login = async (req, res, next) => {
         email: user.email,
         name: user.name,
         timezone: user.timezone,
-        preferences: user.preferences
+        preferences: user.preferences,
+        isEmailVerified: user.isEmailVerified
       }
     });
   } catch (error) {
@@ -187,9 +206,101 @@ export const getProfile = async (req, res, next) => {
         name: req.user.name,
         timezone: req.user.timezone,
         preferences: req.user.preferences,
-        createdAt: req.user.createdAt
+        createdAt: req.user.createdAt,
+        isEmailVerified: req.user.isEmailVerified
       }
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify email
+// @route   GET /api/auth/verify-email/:token
+// @access  Public
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        errorCode: 'INVALID_TOKEN',
+        message: 'Invalid or expired verification token',
+        requestId: req.requestId
+      });
+    }
+
+    // Mark email as verified
+    user.isEmailVerified = true;
+    user.emailVerificationToken = null;
+    user.emailVerificationExpires = null;
+    await user.save();
+
+    // Send welcome email (don't block verification if this fails)
+    try {
+      await sendWelcomeEmail(user);
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+    }
+
+    res.json({
+      success: true,
+      message: 'Email verified successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Resend verification email
+// @route   POST /api/auth/resend-verification
+// @access  Private
+export const resendVerification = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        errorCode: 'USER_NOT_FOUND',
+        message: 'User not found',
+        requestId: req.requestId
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        errorCode: 'ALREADY_VERIFIED',
+        message: 'Email is already verified',
+        requestId: req.requestId
+      });
+    }
+
+    // Generate new verification token
+    const verificationToken = generateVerificationToken();
+    user.emailVerificationToken = verificationToken;
+    user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+    await user.save();
+
+    // Send verification email
+    try {
+      await sendVerificationEmail(user, verificationToken);
+      res.json({
+        success: true,
+        message: 'Verification email sent successfully'
+      });
+    } catch (emailError) {
+      console.error('Failed to send verification email:', emailError);
+      return res.status(500).json({
+        errorCode: 'EMAIL_SEND_FAILED',
+        message: 'Failed to send verification email. Please try again later.',
+        requestId: req.requestId
+      });
+    }
   } catch (error) {
     next(error);
   }

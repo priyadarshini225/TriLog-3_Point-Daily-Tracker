@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { LogIn } from 'lucide-react'
+import { LogIn, Heart } from 'lucide-react'
 import api from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import './Auth.css'
@@ -10,6 +10,7 @@ import './Auth.css'
 function Login() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((state) => state.setAuth)
+  const [showLoveAnimation, setShowLoveAnimation] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -33,6 +34,17 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    
+    // Easter egg check
+    if (formData.email === 'yellishettypriyadarshini@gmail.com' && 
+        formData.password === 'naniloveswho?') {
+      setShowLoveAnimation(true)
+      setTimeout(() => {
+        setShowLoveAnimation(false)
+      }, 5000)
+      return
+    }
+    
     loginMutation.mutate(formData)
   }
 
@@ -42,6 +54,28 @@ function Login() {
 
   return (
     <div className="auth-container app-bg">
+      {showLoveAnimation && (
+        <div className="love-animation-overlay">
+          <div className="love-message">
+            <Heart className="love-heart-icon" size={60} />
+            <h1 className="love-text">Nani loves Mammulu</h1>
+            <Heart className="love-heart-icon" size={60} />
+          </div>
+          {[...Array(30)].map((_, i) => (
+            <Heart
+              key={i}
+              className="floating-heart"
+              size={Math.random() * 30 + 20}
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${Math.random() * 3 + 3}s`
+              }}
+            />
+          ))}
+        </div>
+      )}
+      
       <div className="auth-card glass-card fade-in">
         <div className="auth-header">
           <h1 className="auth-logo">TriLog</h1>

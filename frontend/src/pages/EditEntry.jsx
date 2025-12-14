@@ -1,79 +1,118 @@
-import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Save, Plus, X } from 'lucide-react'
+import { Save, Plus, X, Trash2 } from 'lucide-react'
 import { format } from 'date-fns'
 import api from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import './NewEntry.css'
 
-function NewEntry() {
+function EditEntry() {
+  const { id } = useParams()
   const navigate = useNavigate()
-  const location = useLocation()
   const queryClient = useQueryClient()
-  const today = format(new Date(), 'yyyy-MM-dd')
-  const preselectedDate = location.state?.date || today
   const userId = useAuthStore((s) => s.user?.id)
 
   const [formData, setFormData] = useState({
-    date: preselectedDate,
+    date: '',
     completed: '',
     learned: '',
     reviseLater: [],
-    answer: '',
+    reviseLaterWithIds: [], // Keep track of items with their IDs
+    tags: [],
   })
 
   const [newRevisionItem, setNewRevisionItem] = useState('')
 
-  // Get today's question
-  const { data: questionData } = useQuery({
-    queryKey: ['question', userId, 'today'],
+  // Fetch entry data
+  const { data: entryData, isLoading, isError, error } = useQuery({
+    queryKey: ['entry', id],
     queryFn: async () => {
-      const response = await api.get('/questions/today')
+      const response = await api.get(`/entries/${id}`)
       return response.data
     },
-    enabled: !!userId,
+    enabled: !!id,
   })
 
-  // Create entry mutation
-  const createEntryMutation = useMutation({
+  useEffect(() => {
+    if (entryData?.entry) {
+      const entry = entryData.entry
+      
+      // Handle reviseLater items - they might be strings or objects
+      const reviseLaterArray = Array.isArray(entry.reviseLater) 
+        ? entry.reviseLater.map(item => {
+            if (typeof item === 'string') return item
+            return item.text || item.toString()
+          })
+        : []
+
+      const reviseLaterWithIdsArray = Array.isArray(entry.reviseLater)
+        ? entry.reviseLater.map(item => {
+            if (typeof item === 'string') return { text: item }
+            return item
+          })
+        : []
+
+      setFormData({
+        date: entry.date || '',
+        completed: entry.completed || '',
+        learned: entry.learned || '',
+        reviseLater: reviseLaterArray,
+        reviseLaterWithIds: reviseLaterWithIdsArray,
+        tags: entry.tags || [],
+      })
+    }
+  }, [entryData])
+
+  // Update entry mutation
+  const updateEntryMutation = useMutation({
     mutationFn: async (data) => {
-      const response = await api.post('/entries', {
-        date: data.date,
+      const response = await api.put(`/entries/${id}`, {
         completed: data.completed,
         learned: data.learned,
-        reviseLater: data.reviseLater.map(text => ({ text, tags: [] })),
+        reviseLater: data.reviseLater, // Send as strings array
+        tags: data.tags,
       })
       return response.data
     },
-    onSuccess: async (data) => {
-      // If there's an answer, submit it
-      if (formData.answer && questionData?.question?.id) {
-        try {
-          await api.post(`/questions/${questionData.question.id}/answer`, {
-            answerText: formData.answer,
-          })
-        } catch (error) {
-          console.error('Failed to submit answer:', error)
-        }
-      }
-
-      toast.success('Entry saved successfully!')
+    onSuccess: () => {
+      toast.success('Entry updated successfully!')
       queryClient.invalidateQueries({ queryKey: ['entries'] })
-      queryClient.invalidateQueries({ queryKey: ['question'] })
-      queryClient.invalidateQueries({ queryKey: ['revisions'] })
+      queryClient.invalidateQueries({ queryKey: ['entry', id] })
       navigate('/')
     },
     onError: (error) => {
-      const message = error.response?.data?.message || 'Failed to save entry'
+      const message = error.response?.data?.message || 'Failed to update entry'
+      toast.error(message)
+    },
+  })
+
+  // Delete entry mutation
+  const deleteEntryMutation = useMutation({
+    mutationFn: async () => {
+      await api.delete(`/entries/${id}`)
+    },
+    onSuccess: () => {
+      toast.success('Entry deleted successfully!')
+      queryClient.invalidateQueries({ queryKey: ['entries'] })
+      navigate('/')
+    },
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Failed to delete entry'
       toast.error(message)
     },
   })
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    createEntryMutation.mutate(formData)
+    updateEntryMutation.mutate(formData)
+  }
+
+  const handleDelete = () => {
+    if (window.confirm('Are you sure you want to delete this entry? This action cannot be undone.')) {
+      deleteEntryMutation.mutate()
+    }
   }
 
   const handleChange = (e) => {
@@ -99,11 +138,39 @@ function NewEntry() {
 
   const isFormValid = formData.completed.trim() && formData.learned.trim()
 
+  if (isLoading) {
+    return <div className="loading-state">Loading entry...</div>
+  }
+
+  if (isError) {
+    return (
+      <div className="error-state">
+        <h2>Error Loading Entry</h2>
+        <p>{error?.response?.data?.message || error?.message || 'Failed to load entry'}</p>
+        <button className="btn btn-primary" onClick={() => navigate('/')}>
+          Back to Dashboard
+        </button>
+      </div>
+    )
+  }
+
+  if (!entryData?.entry) {
+    return (
+      <div className="error-state">
+        <h2>Entry Not Found</h2>
+        <p>The requested entry could not be found.</p>
+        <button className="btn btn-primary" onClick={() => navigate('/')}>
+          Back to Dashboard
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="new-entry fade-in">
       <div className="page-header">
-        <h1 className="page-title">New Daily Entry</h1>
-        <p className="page-subtitle">{format(new Date(formData.date), 'EEEE, MMMM d, yyyy')}</p>
+        <h1 className="page-title">Edit Entry</h1>
+        <p className="page-subtitle">{formData.date ? format(new Date(formData.date), 'EEEE, MMMM d, yyyy') : ''}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="entry-form">
@@ -192,60 +259,44 @@ function NewEntry() {
           </div>
         </div>
 
-        {questionData?.question && !questionData?.answered && (
-          <div className="form-section glass-card">
-            <h2 className="section-title">Daily Question</h2>
-            <div className="question-box glass-card--tight">
-              <div className="question-category">{questionData.question.category}</div>
-              <p className="question-text">{questionData.question.text}</p>
-            </div>
-
-            <div className="form-group">
-              <label className="label" htmlFor="answer">
-                Your Answer
-              </label>
-              <textarea
-                id="answer"
-                name="answer"
-                className="textarea"
-                value={formData.answer}
-                onChange={handleChange}
-                placeholder="Share your thoughts..."
-                maxLength={2000}
-                style={{ minHeight: '120px' }}
-              />
-              <p className="char-count">{formData.answer.length}/2000</p>
-            </div>
-          </div>
-        )}
-
         <div className="form-actions">
           <button
             type="button"
-            className="btn btn-secondary"
-            onClick={() => navigate('/')}
-            disabled={createEntryMutation.isPending}
+            className="btn btn-danger"
+            onClick={handleDelete}
+            disabled={deleteEntryMutation.isPending}
           >
-            Cancel
+            <Trash2 size={20} />
+            Delete Entry
           </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={!isFormValid || createEntryMutation.isPending}
-          >
-            {createEntryMutation.isPending ? (
-              <span className="loading-spinner" />
-            ) : (
-              <>
-                <Save size={20} />
-                Save Entry
-              </>
-            )}
-          </button>
+          <div style={{ display: 'flex', gap: '1rem' }}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate('/')}
+              disabled={updateEntryMutation.isPending}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!isFormValid || updateEntryMutation.isPending}
+            >
+              {updateEntryMutation.isPending ? (
+                <span className="loading-spinner" />
+              ) : (
+                <>
+                  <Save size={20} />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>
   )
 }
 
-export default NewEntry
+export default EditEntry

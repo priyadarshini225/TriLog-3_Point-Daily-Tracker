@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
-import { CheckCircle, Clock } from 'lucide-react'
+import { CheckCircle, Clock, X } from 'lucide-react'
 import api from '../lib/api'
 import { useAuthStore } from '../store/authStore'
 import './Revisions.css'
@@ -10,13 +10,17 @@ import './Revisions.css'
 function Revisions() {
   const queryClient = useQueryClient()
   const [filter, setFilter] = useState('pending')
+  const [page, setPage] = useState(1)
   const userId = useAuthStore((s) => s.user?.id)
+  const [activeRevisionId, setActiveRevisionId] = useState(null)
+  const [revisionResponse, setRevisionResponse] = useState('')
+  const [confidence, setConfidence] = useState(3)
 
   const { data, isLoading } = useQuery({
-    queryKey: ['revisions', userId, filter],
+    queryKey: ['revisions', userId, filter, page],
     queryFn: async () => {
-      const status = filter === 'all' ? '' : `status=${filter}`
-      const response = await api.get(`/revisions?${status}&limit=50`)
+      const status = filter === 'all' ? '' : `status=${filter}&`
+      const response = await api.get(`/revisions?${status}limit=10&page=${page}`)
       return response.data
     },
     enabled: !!userId,
@@ -34,6 +38,9 @@ function Revisions() {
       toast.success('Revision completed!')
       queryClient.invalidateQueries({ queryKey: ['revisions'] })
       queryClient.invalidateQueries({ queryKey: ['entries'] })
+      setActiveRevisionId(null)
+      setRevisionResponse('')
+      setConfidence(3)
     },
     onError: (error) => {
       const message = error.response?.data?.message || 'Failed to complete revision'
@@ -42,10 +49,25 @@ function Revisions() {
   })
 
   const handleComplete = (revisionId) => {
-    completeRevisionMutation.mutate({ id: revisionId, confidence: 5 })
+    if (activeRevisionId === revisionId) {
+      completeRevisionMutation.mutate({ 
+        id: revisionId, 
+        responseText: revisionResponse,
+        confidence: confidence
+      })
+    } else {
+      setActiveRevisionId(revisionId)
+    }
+  }
+
+  const handleCancel = () => {
+    setActiveRevisionId(null)
+    setRevisionResponse('')
+    setConfidence(3)
   }
 
   const revisions = data?.revisions || []
+  const pagination = data?.pagination || { total: 0, page: 1, pages: 1 }
 
   return (
     <div className="revisions-page fade-in">
@@ -112,14 +134,66 @@ function Revisions() {
 
                 {revision.status === 'pending' && (
                   <div className="revision-actions">
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() => handleComplete(revision._id)}
-                      disabled={completeRevisionMutation.isPending}
-                    >
-                      <CheckCircle size={16} />
-                      Mark Complete
-                    </button>
+                    {activeRevisionId === revision._id ? (
+                      <div className="revision-response-form" style={{ width: '100%' }}>
+                        <div className="form-group">
+                          <label className="label" style={{ fontSize: '0.875rem' }}>
+                            Your reflection on this topic:
+                          </label>
+                          <textarea
+                            className="textarea"
+                            value={revisionResponse}
+                            onChange={(e) => setRevisionResponse(e.target.value)}
+                            placeholder="What do you remember? What have you learned?"
+                            maxLength={1000}
+                            style={{ minHeight: '100px', marginBottom: '1rem' }}
+                          />
+                        </div>
+                        <div className="form-group" style={{ marginBottom: '1rem' }}>
+                          <label className="label" style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+                            Confidence level: {confidence}/5
+                          </label>
+                          <input
+                            type="range"
+                            min="1"
+                            max="5"
+                            value={confidence}
+                            onChange={(e) => setConfidence(parseInt(e.target.value))}
+                            className="confidence-slider"
+                            style={{ width: '100%' }}
+                          />
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', opacity: 0.7, marginTop: '0.25rem' }}>
+                            <span>1 - Need review</span>
+                            <span>5 - Mastered</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={handleCancel}
+                          >
+                            <X size={16} />
+                            Cancel
+                          </button>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleComplete(revision._id)}
+                            disabled={completeRevisionMutation.isPending}
+                          >
+                            <CheckCircle size={16} />
+                            Mark Complete
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleComplete(revision._id)}
+                      >
+                        <CheckCircle size={16} />
+                        Complete Review
+                      </button>
+                    )}
                   </div>
                 )}
 
@@ -131,6 +205,29 @@ function Revisions() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination.pages > 1 && (
+          <div className="pagination" style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '2rem' }}>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+            <span style={{ display: 'flex', alignItems: 'center', padding: '0 1rem', fontSize: '0.875rem' }}>
+              Page {page} of {pagination.pages}
+            </span>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => setPage(p => Math.min(pagination.pages, p + 1))}
+              disabled={page === pagination.pages}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
