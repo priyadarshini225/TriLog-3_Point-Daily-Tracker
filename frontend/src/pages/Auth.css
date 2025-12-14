@@ -600,16 +600,15 @@
   font-weight: 900;
   color: #ff1493;
   text-shadow: 
-    0 0 10px rgba(255, 20, 147, 0.8),
-    0 0 20px rgba(255, 20, 147, 0.6),
-    0 0 30px rgba(255, 20, 147, 0.4);
+    0 0 5px rgba(255, 20, 147, 0.4),
+    0 0 10px rgba(255, 20, 147, 0.3);
   letter-spacing: 0.05em;
   text-align: center;
 }
 
 .love-heart-icon {
   color: #ff1493;
-  filter: drop-shadow(0 0 20px rgba(255, 20, 147, 0.8));
+  filter: drop-shadow(0 0 8px rgba(255, 20, 147, 0.4));
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -618,7 +617,7 @@
   color: #ff69b4;
   opacity: 0;
   animation: floatUp 5s ease-in infinite;
-  filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.6));
+  filter: drop-shadow(0 0 5px rgba(255, 105, 180, 0.3));
 }
 
 @keyframes fadeIn {
