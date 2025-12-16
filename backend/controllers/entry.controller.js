@@ -64,8 +64,6 @@ export const createEntry = async (req, res, next) => {
     const { date, completed, learned, reviseLater, tags } = req.body;
     const userId = req.user._id;
 
-    console.log('Creating entry with data:', { date, completed, learned, reviseLater, tags });
-
     // Check if entry already exists for this date
     const existingEntry = await DailyEntry.findOne({ userId, date });
     if (existingEntry) {
@@ -172,54 +170,37 @@ export const updateEntry = async (req, res, next) => {
 
     // Track edit history
     const editHistory = entry.meta?.editHistory || [];
-    if (completed && completed !== entry.completed) {
+    if (completed !== entry.completed) {
       editHistory.push({ editedAt: new Date(), field: 'completed' });
     }
-    if (learned && learned !== entry.learned) {
+    if (learned !== entry.learned) {
       editHistory.push({ editedAt: new Date(), field: 'learned' });
     }
 
-    // Update fields
-    if (completed !== undefined) entry.completed = completed;
-    if (learned !== undefined) entry.learned = learned;
-    if (tags !== undefined) entry.tags = tags;
-    
+    entry.completed = completed;
+    entry.learned = learned;
+    entry.tags = tags || entry.tags;
     entry.meta = {
       ...entry.meta,
       editHistory
     };
 
     // Handle reviseLater updates
-    if (reviseLater !== undefined) {
-      // Process the incoming reviseLater array
-      const processedItems = reviseLater.map((item, index) => {
-        if (typeof item === 'string') {
-          // If it's just a string, create a new item
-          return {
-            id: `${Date.now()}_${index}`,
-            text: item,
-            tags: []
-          };
-        } else if (item.id) {
-          // Keep existing items with IDs
-          return item;
-        } else {
-          // New items without IDs
-          return {
-            id: `${Date.now()}_${index}`,
-            text: item.text || item,
-            tags: item.tags || []
-          };
-        }
-      });
+    if (reviseLater) {
+      const newItems = reviseLater.filter(item => !item.id).map((item, index) => ({
+        id: `${Date.now()}_${index}`,
+        text: item.text,
+        tags: item.tags || []
+      }));
 
-      // Find truly new items (not in original entry)
-      const existingIds = new Set(entry.reviseLater.map(item => item.id));
-      const newItems = processedItems.filter(item => !existingIds.has(item.id));
+      entry.reviseLater = [
+        ...entry.reviseLater.filter(item => 
+          reviseLater.some(r => r.id === item.id)
+        ),
+        ...newItems
+      ];
 
-      entry.reviseLater = processedItems;
-
-      // Schedule revisions for new items only
+      // Schedule revisions for new items
       if (newItems.length > 0) {
         try {
           await scheduleRevisions(entry, newItems);

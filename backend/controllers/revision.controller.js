@@ -2,29 +2,17 @@ import { validationResult } from 'express-validator';
 import RevisionSchedule from '../models/RevisionSchedule.model.js';
 
 // @desc    Get revisions for user
-// @route   GET /api/revisions?status=pending&limit=20&completedDate=YYYY-MM-DD
+// @route   GET /api/revisions?status=pending&limit=20
 // @access  Private
 export const getRevisions = async (req, res, next) => {
   try {
-    const { status, limit = 20, page = 1, completedDate } = req.query;
+    const { status, limit = 20, page = 1 } = req.query;
     const userId = req.user._id;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     let query = { userId };
     
-    // Filter by completed date if provided
-    if (completedDate) {
-      const startOfDay = new Date(completedDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(completedDate);
-      endOfDay.setHours(23, 59, 59, 999);
-      
-      query.status = 'completed';
-      query.completedAt = {
-        $gte: startOfDay,
-        $lte: endOfDay
-      };
-    } else if (status) {
+    if (status) {
       query.status = status;
     } else {
       // Default to pending and notified revisions

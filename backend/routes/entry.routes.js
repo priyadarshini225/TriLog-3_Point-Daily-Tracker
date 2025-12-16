@@ -23,18 +23,11 @@ const createEntryValidation = [
   body('tags').optional().isArray()
 ];
 
-const updateEntryValidation = [
-  body('completed').optional().trim().isLength({ max: 500 }),
-  body('learned').optional().trim().isLength({ max: 500 }),
-  body('reviseLater').optional().isArray(),
-  body('tags').optional().isArray()
-];
-
 // Routes
 router.get('/', getEntries);
 router.post('/', createEntryValidation, createEntry);
 router.get('/:id', getEntry);
-router.put('/:id', updateEntryValidation, updateEntry);
+router.put('/:id', createEntryValidation, updateEntry);
 router.delete('/:id', deleteEntry);
 
 export default router;

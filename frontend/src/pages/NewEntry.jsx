@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { Save, Plus, X } from 'lucide-react'
@@ -10,14 +10,12 @@ import './NewEntry.css'
 
 function NewEntry() {
   const navigate = useNavigate()
-  const location = useLocation()
   const queryClient = useQueryClient()
   const today = format(new Date(), 'yyyy-MM-dd')
-  const preselectedDate = location.state?.date || today
   const userId = useAuthStore((s) => s.user?.id)
 
   const [formData, setFormData] = useState({
-    date: preselectedDate,
+    date: today,
     completed: '',
     learned: '',
     reviseLater: [],

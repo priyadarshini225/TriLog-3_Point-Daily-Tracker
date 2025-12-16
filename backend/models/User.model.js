@@ -23,10 +23,6 @@ const userSchema = new mongoose.Schema({
     trim: true,
     maxlength: 100
   },
-  avatar: {
-    type: String,
-    default: ''
-  },
   timezone: {
     type: String,
     default: 'UTC'
@@ -59,18 +55,6 @@ const userSchema = new mongoose.Schema({
   oauthId: {
     type: String,
     sparse: true
-  },
-  isEmailVerified: {
-    type: Boolean,
-    default: false
-  },
-  emailVerificationToken: {
-    type: String,
-    default: null
-  },
-  emailVerificationExpires: {
-    type: Date,
-    default: null
   },
   status: {
     type: String,

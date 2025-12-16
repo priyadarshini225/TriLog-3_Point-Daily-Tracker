@@ -9,7 +9,6 @@ import './Settings.css'
 function Settings() {
   const queryClient = useQueryClient()
   const userId = useAuthStore((s) => s.user?.id)
-  const updateUser = useAuthStore((s) => s.updateUser)
   
   const { data: settingsData, isLoading } = useQuery({
     queryKey: ['settings', userId],
@@ -38,13 +37,8 @@ function Settings() {
       const response = await api.put('/user/settings', data)
       return response.data
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success('Settings saved successfully!')
-      // Update the auth store with new settings
-      updateUser({
-        timezone: data.settings.timezone,
-        preferences: data.settings.preferences
-      })
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
     onError: (error) => {
